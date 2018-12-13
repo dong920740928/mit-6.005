@@ -5,6 +5,7 @@ package twitter;
 
 import static org.junit.Assert.*;
 
+import java.sql.Time;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
@@ -19,11 +20,18 @@ public class ExtractTest {
      * Make sure you have partitions.
      */
     
+    
     private static final Instant d1 = Instant.parse("2016-02-17T10:00:00Z");
     private static final Instant d2 = Instant.parse("2016-02-17T11:00:00Z");
+    private static final Instant d3 = Instant.parse("2016-02-18T11:00:00Z");
+    private static final Instant d4 = Instant.parse("2016-03-17T11:00:00Z");
+    private static final Instant d5 = Instant.parse("2017-02-17T11:00:00Z");
     
     private static final Tweet tweet1 = new Tweet(1, "alyssa", "is it reasonable to talk about rivest so much?", d1);
     private static final Tweet tweet2 = new Tweet(2, "bbitdiddle", "rivest talk in 30 minutes #hype", d2);
+    private static final Tweet tweet3 = new Tweet(3, "ethan", "rivest talk in 30 minutes @alyssa #hype", d3);
+    private static final Tweet tweet4 = new Tweet(4, "david", "rivest talk in 30 minutes @alyssa. @ethan #hype", d4);
+    private static final Tweet tweet5 = new Tweet(5, "qwe", "rivest talk in 30 minutes @david @qwe @david #hype", d5);
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
@@ -36,6 +44,39 @@ public class ExtractTest {
         
         assertEquals("expected start", d1, timespan.getStart());
         assertEquals("expected end", d2, timespan.getEnd());
+        
+        timespan = Extract.getTimespan(Arrays.asList(tweet2, tweet1));
+        
+        assertEquals("expected start", d1, timespan.getStart());
+        assertEquals("expected end", d2, timespan.getEnd());
+        
+        timespan = Extract.getTimespan(Arrays.asList(tweet4, tweet3));
+        
+        assertEquals("expected start", d3, timespan.getStart());
+        assertEquals("expected end", d4, timespan.getEnd());
+        
+        timespan = Extract.getTimespan(Arrays.asList(tweet1, tweet5));
+        
+        assertEquals("expected start", d1, timespan.getStart());
+        assertEquals("expected end", d5, timespan.getEnd());
+    }
+    
+    @Test
+    public void testGetTimespanMultiTweets() {
+        Timespan timespan = Extract.getTimespan(Arrays.asList(tweet2, tweet1, tweet3));
+        
+        assertEquals("expected start", d1, timespan.getStart());
+        assertEquals("expected end", d3, timespan.getEnd());
+        
+        timespan = Extract.getTimespan(Arrays.asList(tweet1, tweet2, tweet5));
+        
+        assertEquals("expected start", d1, timespan.getStart());
+        assertEquals("expected end", d5, timespan.getEnd());
+        
+        timespan = Extract.getTimespan(Arrays.asList(tweet2, tweet5, tweet4, tweet3, tweet1));
+        
+        assertEquals("expected start", d1, timespan.getStart());
+        assertEquals("expected end", d5, timespan.getEnd());
     }
     
     @Test
@@ -43,6 +84,18 @@ public class ExtractTest {
         Set<String> mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet1));
         
         assertTrue("expected empty set", mentionedUsers.isEmpty());
+        
+        mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet2));
+        assertTrue("expected empty set", mentionedUsers.isEmpty());
+
+        mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet3));
+        assertEquals("expected empty set", mentionedUsers.size(), 1);
+        
+        mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet4));
+        assertEquals("expected empty set", mentionedUsers.size(), 1);
+        
+        mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet5));
+        assertEquals("expected empty set", mentionedUsers.size(), 2);
     }
 
     /*
