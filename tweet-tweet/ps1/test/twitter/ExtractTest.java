@@ -87,15 +87,23 @@ public class ExtractTest {
         
         mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet2));
         assertTrue("expected empty set", mentionedUsers.isEmpty());
-
-        mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet3));
+    }
+    
+    @Test
+    public void testGetMentionedUsers() {
+        Set<String> mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet3));
         assertEquals("expected empty set", mentionedUsers.size(), 1);
+        assertTrue(mentionedUsers.contains("alyssa"));
         
         mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet4));
         assertEquals("expected empty set", mentionedUsers.size(), 1);
+        assertTrue(mentionedUsers.contains("ethan"));
+
         
         mentionedUsers = Extract.getMentionedUsers(Arrays.asList(tweet5));
         assertEquals("expected empty set", mentionedUsers.size(), 2);
+        assertTrue(mentionedUsers.contains("david"));
+        assertTrue(mentionedUsers.contains("qwe"));
     }
 
     /*

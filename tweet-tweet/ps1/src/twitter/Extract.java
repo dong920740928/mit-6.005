@@ -4,14 +4,9 @@
 package twitter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.lang.model.element.VariableElement;
-
-import org.w3c.dom.css.ElementCSSInlineStyle;
 
 /**
  * Extract consists of methods that extract information from a list of tweets.
@@ -64,7 +59,7 @@ public class Extract {
      *         once.
      */
     public static Set<String> getMentionedUsers(List<Tweet> tweets) {
-        Set<String> mentioned = new HashSet<>();
+        Set<String> mentioned = new LinkedHashSet<>();
         for (int i = 0; i < tweets.size(); ++i) {
             String text = tweets.get(i).getText();
 
@@ -73,6 +68,13 @@ public class Extract {
         }
 
         return mentioned;
+    }
+    
+    public static Set<String>  getMentionedUsers(Tweet tweet) {
+       Set<String> mentioned = new LinkedHashSet<>();
+       addMentionedUsersToSet(tweet.getText(), mentioned);
+       
+       return mentioned;
     }
 
     private static void addMentionedUsersToSet(String text, Set<String> mentioned) {
@@ -87,7 +89,7 @@ public class Extract {
                 } else if (Character.isWhitespace(nextChar)) {
                     if (j > index) {
                         // find user name
-                        mentioned.add(text.substring(index, j + 1));
+                        mentioned.add(text.substring(index + 1, j + 1).toLowerCase());
                     }
                     break;
                 } else {
